@@ -1,0 +1,255 @@
+{
+    "_object": "Behaviour",
+    "initial": "idle",
+    "states": {
+        "idle": {
+            "type": "idle",
+            "actions": [],
+            "transitions": [
+                {
+                    "to": "regenerate",
+                    "condition": "health_ratio < 1.0"
+                },
+                {
+                    "to": "intimidate",
+                    "condition": "enemies_in_sight > 0 and distance_to_nearest_enemy > 5"
+                },
+                {
+                    "to": "battle_pose",
+                    "condition": "enemies_in_sight > 0 and distance_to_nearest_enemy <= 5"
+                }
+            ]
+        },
+
+        "regenerate": {
+            "type": "action",
+            "actions": ["heal"],
+            "context": {
+                "regen_mode": "percent",
+                "regen_amount": 0.15
+            },
+            "transitions": [
+                {
+                    "to": "battle_pose",
+                    "condition": "enemies_in_sight > 0"
+                },
+                {
+                    "to": "idle",
+                    "condition": "health_ratio >= 1.0"
+                }
+            ]
+        },
+
+        "battle_pose": {
+            "type": "transition",
+            "actions": [],
+            "context": {},
+            "transitions": [
+                {
+                    "to": "take_off",
+                    "condition": "surrounded == True and stamina >= 6"
+                },
+                {
+                    "to": "claw_slash",
+                    "condition": "distance_to_nearest_enemy <= 2 and stamina >= 2"
+                },
+                {
+                    "to": "tail_swing",
+                    "condition": "distance_to_nearest_enemy <= 2 and stamina >= 2 and enemy_behind == True"
+                },
+                {
+                    "to": "fire_breath",
+                    "condition": "distance_to_nearest_enemy <= 5 and stamina >= 3"
+                },
+                {
+                    "to": "fireball",
+                    "condition": "distance_to_nearest_enemy > 5 and stamina >= 4"
+                },
+                {
+                    "to": "approach",
+                    "condition": "distance_to_nearest_enemy > 2 and stamina >= 1"
+                },
+                {
+                    "to": "idle",
+                    "condition": "enemies_in_sight == 0"
+                }
+            ]
+        },
+
+        "approach": {
+            "type": "move",
+            "actions": ["move"],
+            "context" : {
+                "direction": "towards_enemy",
+                "cost": {"stamina": 1}
+            },
+            "transitions": [
+                {
+                    "to": "battle_pose"
+                }
+            ]
+        },
+
+        "fireball": {
+            "type": "action",
+            "actions": ["fireball"],
+            "context" : {
+                "cooldown": 2,
+                "cost": {"stamina": 4}
+            },
+            "transitions": [
+                {
+                    "to": "battle_pose",
+                    "condition": "True"
+                }
+            ]
+        },
+
+        "fire_breath": {
+            "type": "action",
+            "actions": ["fire_breath"],
+            "context" : {
+                "cooldown": 1,
+                "cost": {"stamina": 3}
+            },
+            "transitions": [
+                {
+                    "to": "battle_pose",
+                    "condition": "True"
+                }
+            ]
+        },
+
+        "tail_swing": {
+            "type": "action",
+            "actions": ["tail_swing"],
+            "context" : {
+                "cooldown": 0,
+                "cost": {"stamina": 2}
+            },
+            "transitions": [
+                {
+                    "to": "battle_pose",
+                    "condition": "True"
+                }
+            ]
+        },
+
+        "claw_slash": {
+            "type": "action",
+            "actions": ["claw_slash"],
+            "context" : {
+                "cooldown": 0,
+                "cost": {"stamina": 2}
+            },
+            "transitions": [
+                {
+                    "to": "battle_pose",
+                    "condition": "True"
+                }
+            ]
+        },
+
+        "intimidate": {
+            "type": "action",
+            "actions": ["intimidate", "roar", "buff"],
+            "context" : {
+                "effects": "global_resist relative 50 3,attack_damage relative 50 2"
+            },
+            "transitions": [
+                {
+                    "to": "battle_pose",
+                    "condition": "enemies_in_sight > 0"
+                },
+                {
+                    "to": "idle",
+                    "condition": "enemies_in_sight == 0"
+                }
+            ]
+        },
+
+        "take_off": {
+            "type": "action",
+            "actions": ["take_off"],
+            "context" : {},
+            "transitions": [
+                {
+                    "to": "land",
+                    "condition": "stamina < 2 or enemies_in_sight == 0"
+                },
+                {
+                    "to": "sky_inferno",
+                    "condition": "stamina >= 6"
+                },
+                {
+                    "to": "fly",
+                    "condition": "stamina >= 2"
+                }
+            ]
+        },
+
+        "sky_inferno": {
+            "type": "action",
+            "actions": ["sky_inferno"],
+            "context" : {
+                "cooldown": 0,
+                "cost": {"stamina": 6}
+            },
+            "transitions": [
+                {
+                    "to": "land",
+                    "condition": "stamina < 2 or enemies_in_sight == 0"
+                },
+                {
+                    "to": "sky_inferno",
+                    "condition": "stamina >= 6"
+                },
+                {
+                    "to": "fly",
+                    "condition": "stamina >= 2"
+                }
+            ]
+        },
+
+        "fly": {
+            "type": "action",
+            "actions": ["fly"],
+            "context" : {
+                "cooldown": 0,
+                "cost": {"stamina": 2}
+            },
+            "transitions": [
+                {
+                    "to": "fly",
+                    "condition": "stamina >= 2"
+                },
+                {
+                    "to": "land",
+                    "condition": "stamina < 2 or enemies_in_sight == 0"
+                }
+            ]
+        },
+
+        "land": {
+            "type": "action",
+            "actions": ["land"],
+            "context" : {},
+            "transitions": [
+                {
+                    "to": "idle",
+                    "condition": "enemies_in_sight == 0"
+                },
+                {
+                    "to": "battle_pose",
+                    "condition": "enemies_in_sight > 0"
+                }
+            ]
+        }
+    },
+
+    "global_triggers": [],
+
+    "extra": {
+        "notes": "Dragon regenerates when calm, sees anyone carrying gold, and unleashes ultimate fire from the sky if surrounded."
+    }
+}
